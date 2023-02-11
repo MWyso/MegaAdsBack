@@ -1,4 +1,4 @@
-import {AdEntity, NewAdEntity} from "../types";
+import {AdEntity, NewAdEntity, SimpleAdEntity} from "../types";
 import {ValidationError} from "../utils/errors";
 import {pool} from "../utils/db";
 import {FieldPacket} from "mysql2";
@@ -14,7 +14,6 @@ export class AdRecord implements AdEntity {
     url: string;
     lat: number;
     lon: number;
-
     constructor(obj: NewAdEntity) {
         if(!obj.name || obj.name.length > 100) {
             throw new ValidationError('Nazwa ogłoszenia nie może być pusta, ani przekraczać 100 znaków.');
@@ -68,6 +67,22 @@ export class AdRecord implements AdEntity {
             url: this.url,
             lat: this.lat,
             lon: this.lon,
+        });
+    }
+
+    static async findAll(name: string): Promise<SimpleAdEntity[]> {
+        const [results] = await pool.execute("SELECT * FROM `ads` WHERE `name` LIKE :search", {
+            search: `%${name}%`,
+        }) as AdRecordResults;
+
+        return results.map(result => {
+            const {
+                id, lat, lon,
+            } = result;
+
+            return {
+                id, lat, lon,
+            };
         });
     }
 }
