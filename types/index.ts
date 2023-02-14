@@ -1,1 +1,1 @@
-export * from './ad/index';
+export * from './ad';
