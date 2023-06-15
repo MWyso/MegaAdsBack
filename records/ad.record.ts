@@ -3,6 +3,7 @@ import {ValidationError} from "../utils/errors";
 import {pool} from "../utils/db";
 import {FieldPacket} from "mysql2";
 import {v4 as uuid} from 'uuid';
+import {validationUrl} from "../utils/validation-url";
 
 type AdRecordResults = [AdEntity[], FieldPacket[]];
 
@@ -27,9 +28,13 @@ export class AdRecord implements AdEntity {
             throw new ValidationError('Cena nie może być mniejsza od 0, lub większa niż 9 999 999.');
         }
 
-        // @TODO Check if url is valid!
         if(!obj.url || obj.url.length > 100) {
             throw new ValidationError('Link ogłoszenia nie może być pusty, ani przekraczać 100 znaków');
+        }
+
+        if (!validationUrl(obj.url)) {
+            throw new ValidationError(
+                'Check that it contains For example, a protocol, https, a //, and so on.');
         }
 
         if(typeof obj.lat !== 'number' || typeof obj.lon !== 'number') {
